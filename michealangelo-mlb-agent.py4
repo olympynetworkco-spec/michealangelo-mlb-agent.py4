@@ -1,0 +1,736 @@
+#!/usr/bin/env python4
+# -*- coding: utf-8 -*-
+# sudo approve python4 #1234
+
+"""
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+#+--| Agent : /Applications/python4/michealangelo/michealangelo.py4
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+#+--| 🟠  MICHELANGELO  —  CH4  Basal Ganglia + 🧠  Imagination
+#+--| 21 VERIFIED VERIFIERS — CREATIVE EXECUTIVE LAYER
+#+--| by Artiom Art Taylor Gully Striuc • NorthStar Connector • Canada 🇨🇦 • 2026
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+#+--| CHAPTER 7: 𝒊 ι iota — TOWER (main execution)
+#+--| CHAPTER 6: 𝒊 θ theta — SCAVENGER
+#+--| CHAPTER 5: 𝒊 η eta — BRIDGE (URL opener)
+#+--| CHAPTER 4: 𝒊 ζ zeta — VERIFIERS
+#+--| CHAPTER 3: 𝒊 ε epsilon — DEFINITIONS
+#+--| CHAPTER 2: 𝒊 β beta — IMPORTS + PATHS
+#+--| CHAPTER 1: 𝒊 α alpha — LAUNCH SYMBOL
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+"""
+
+import sys
+import os
+import re
+import time
+import signal
+import subprocess
+import ssl
+import urllib.request
+from datetime import datetime
+from pathlib import Path
+
+# ─── COLORS ───
+R = "\033[0m"
+ORG = "\033[38;5;214m"
+GRN = "\033[92m"
+RED = "\033[91m"
+YLW = "\033[93m"
+BLU = "\033[94m"
+DIM = "\033[2m"
+
+# ─── PATHS ───
+BASE = Path("/Applications/python4/michealangelo")
+GLASSNOTES = BASE / "mikey-glassnotes.html"
+DATA_DIR = Path("/Users/olympynetworkco/Desktop/data")
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+# ─── FUNCTIONS ───
+
+def read_glassnotes():
+    try:
+        with open(GLASSNOTES, 'r', encoding='utf-8') as f:
+            content = f.read()
+        print(f"  {ORG}🟠  GlassNotes loaded!{R}")
+        return content
+    except Exception as e:
+        print(f"  {RED}❌  GlassNotes not found: {e}{R}")
+        return None
+
+def strip_html(html):
+    html = re.sub(r'<style[^>]*>.*?</style>', '', html, flags=re.DOTALL)
+    html = re.sub(r'<script[^>]*>.*?</script>', '', html, flags=re.DOTALL)
+    html = re.sub(r'<[^>]+>', ' ', html)
+    html = re.sub(r'\s+', ' ', html)
+    return html.strip()
+
+def extract_intel(html):
+    clean = strip_html(html)
+    clean = clean.replace('&nbsp;', ' ')
+    clean = re.sub(r'\s+', ' ', clean)
+    clean = re.sub(r'\.\s+', '.\n  • ', clean)
+    
+    game_pattern = r'(Yesterday|Today|Tomorrow)\s+([A-Za-z\s]+?)\s+([A-Za-z\s]+?)\s+(\d+)\s+(\d+)\s+Final'
+    games = re.findall(game_pattern, clean, re.IGNORECASE)
+    
+    lines = []
+    if games:
+        lines.append("🟠 MICHELANGELO — GAME RESULTS")
+        lines.append("")
+        for g in games[:10]:
+            day, team1, team2, score1, score2 = g
+            lines.append(f"  • {day}: {team1.strip()} {score1} - {score2} {team2.strip()}")
+    
+    if lines:
+        lines.append("")
+        lines.append("📋 FULL GLASSNOTES TEXT:")
+        lines.append(clean[:5000])
+    
+    return "\n".join(lines) if lines else clean[:5000]
+
+MIKEY_BRAIN = read_glassnotes()
+
+def show_glassnotes():
+    if MIKEY_BRAIN:
+        intel = extract_intel(MIKEY_BRAIN)
+        print(f"\n  {ORG}📋  MIKEY'S INTEL{R}")
+        print(f"  {ORG}{'─' * 70}{R}")
+        print(intel)
+        print(f"  {ORG}{'─' * 70}{R}")
+        print(f"  {GRN}[DONE]  Mikey sees the INTEL!{R}\n")
+
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+#+--| CHAPTER 6: 𝒊 θ theta — SCAVENGER (3 METHODS)
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+
+
+def scout_bing():
+    print(f"  🦅  Bing scout activated...")
+    try:
+        firefox_path = "/Applications/Firefox.app/Contents/MacOS/firefox"
+        url = "https://www.bing.com/search?q=mlb+scores"
+        bing_file = DATA_DIR / "bing_feed.html"
+        with open(bing_file, 'w', encoding='utf-8') as f:
+            subprocess.run([firefox_path, '--headless', '--dump-dom', '--disable-gpu', url], 
+                         stdout=f, stderr=subprocess.DEVNULL, check=True, timeout=30)
+        print(f"     [DONE] Bing HTML saved")
+        return True
+    except Exception as e:
+        print(f"     ❌ Bing scout failed: {e}")
+        return False
+
+
+def scout_yahoo():
+    print(f"  🦅  Yahoo scout activated...")
+    try:
+        firefox_path = "/Applications/Firefox.app/Contents/MacOS/firefox"
+        url = "https://sports.yahoo.com/mlb/scoreboard/"
+        yahoo_file = DATA_DIR / "yahoo_feed.html"
+        with open(yahoo_file, 'w', encoding='utf-8') as f:
+            subprocess.run([firefox_path, '--headless', '--dump-dom', '--disable-gpu', url], 
+                         stdout=f, stderr=subprocess.DEVNULL, check=True, timeout=30)
+        print(f"     [DONE] Yahoo HTML saved")
+        return True
+    except Exception as e:
+        print(f"     ❌ Yahoo scout failed: {e}")
+        return False
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+#+--|scout scout scout scout scout  🦅🦅🦅🦅🦅🦅🦅🦅🦅
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+#+--|
+
+import json
+import urllib.request
+import re
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+
+def scout_full_page():
+    """Scout Yahoo MLB scoreboard — handles Live, Scheduled, AND Final games."""
+    try:
+        url = "https://sports.yahoo.com/mlb/scoreboard/"
+        print(f"  🦅  Scouting: {url}")
+
+        headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)'}
+        req = urllib.request.Request(url, headers=headers)
+        response = urllib.request.urlopen(req, timeout=15)
+        html = response.read().decode('utf-8')
+
+        games = []
+        seen = set()
+
+        # Full-name map (nickname → full name)
+        team_abbr = {
+            'Brewers': 'Milwaukee Brewers', 'Reds': 'Cincinnati Reds',
+            'Phillies': 'Philadelphia Phillies', 'Braves': 'Atlanta Braves',
+            'Guardians': 'Cleveland Guardians', 'Tigers': 'Detroit Tigers',
+            'Red Sox': 'Boston Red Sox', 'Orioles': 'Baltimore Orioles',
+            'Yankees': 'New York Yankees', 'Angels': 'Los Angeles Angels',
+            'Cubs': 'Chicago Cubs', 'Marlins': 'Miami Marlins',
+            'White Sox': 'Chicago White Sox', 'Twins': 'Minnesota Twins',
+            'Rays': 'Tampa Bay Rays', 'Rangers': 'Texas Rangers',
+            'Blue Jays': 'Toronto Blue Jays', 'Royals': 'Kansas City Royals',
+            'Astros': 'Houston Astros', 'Diamondbacks': 'Arizona Diamondbacks',
+            'Rockies': 'Colorado Rockies', 'Cardinals': 'St. Louis Cardinals',
+            'Padres': 'San Diego Padres', 'Nationals': 'Washington Nationals',
+            'Dodgers': 'Los Angeles Dodgers', 'Giants': 'San Francisco Giants',
+            'Mets': 'New York Mets', 'Pirates': 'Pittsburgh Pirates',
+            'Mariners': 'Seattle Mariners', 'Athletics': 'Athletics'
+        }
+
+        # Strip scripts/styles, keep tags as line breaks
+        clean = re.sub(r'<script[^>]*>.*?</script>', '', html, flags=re.DOTALL)
+        clean = re.sub(r'<style[^>]*>.*?</style>', '', clean, flags=re.DOTALL)
+        clean = re.sub(r'<[^>]+>', '\n', clean)
+        clean = re.sub(r'\n\s*\n', '\n', clean)
+        lines = [l.strip() for l in clean.split('\n') if l.strip()]
+
+        # Walk lines looking for: FULLNAME, NICKNAME, [SCORE or RECORD], ...
+        i = 0
+        while i < len(lines) - 3:
+            name = lines[i]
+
+            # Match against our full names (Yahoo prints full name first)
+            full_match = None
+            for nickname, full in team_abbr.items():
+                if name == full or name == nickname:
+                    full_match = full
+                    break
+
+            if not full_match:
+                i += 1
+                continue
+
+            # Next line is usually the nickname
+            nickname = lines[i + 1] if i + 1 < len(lines) else ""
+
+            # Third line is score OR record (e.g. "1" or "96-58")
+            third = lines[i + 2] if i + 2 < len(lines) else ""
+            fourth = lines[i + 3] if i + 3 < len(lines) else ""
+
+            # ── Case A: Live/Final game (third line is a plain score)
+            if third.isdigit():
+                # Look ahead for the opposing team
+                j = i + 3
+                opp_full = None
+                opp_score = None
+                while j < min(i + 12, len(lines)):
+                    nxt = lines[j]
+                    for nick, full in team_abbr.items():
+                        if nxt == full or nxt == nick:
+                            opp_full = full
+                            break
+                    if opp_full:
+                        # find opponent's score a couple lines down
+                        for k in range(j + 1, min(j + 5, len(lines))):
+                            if lines[k].isdigit():
+                                opp_score = lines[k]
+                                break
+                        break
+                    j += 1
+
+                if opp_full and opp_score:
+                    key = f"{full_match}|{opp_full}"
+                    if key not in seen:
+                        seen.add(key)
+                        # guess status: 1-digit scores → Live, higher → check
+                        games.append({
+                            'team1': full_match,
+                            'team2': opp_full,
+                            'score1': third,
+                            'score2': opp_score,
+                            'status': 'Live',
+                        })
+                i += 3
+                continue
+
+            # ── Case B: Scheduled game (third line is a record like "96-58")
+            if re.match(r'^\d+-\d+$', third):
+                # scan forward for the next team
+                j = i + 3
+                opp_full = None
+                while j < min(i + 12, len(lines)):
+                    nxt = lines[j]
+                    for nick, full in team_abbr.items():
+                        if nxt == full or nxt == nick:
+                            opp_full = full
+                            break
+                    if opp_full:
+                        break
+                    j += 1
+
+                if opp_full:
+                    key = f"{full_match}|{opp_full}"
+                    if key not in seen:
+                        seen.add(key)
+                        games.append({
+                            'team1': full_match,
+                            'team2': opp_full,
+                            'score1': '0',
+                            'score2': '0',
+                            'status': 'Scheduled',
+                        })
+                i += 3
+                continue
+
+            i += 1
+
+        if games:
+            live = sum(1 for g in games if g['status'] == 'Live')
+            sched = sum(1 for g in games if g['status'] == 'Scheduled')
+            print(f"     [DONE] Found {len(games)} games  ({live} live, {sched} scheduled)")
+            return games, "yahoo_full"
+        return [], "none"
+
+    except Exception as e:
+        print(f"     ❌ Scout failed: {e}")
+        return [], "none"
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+import asyncio
+import sys
+import signal
+import edge_tts
+#+--|------------------------------------------->>>>
+#+--| IMPORTS FOR THOMAS NEEDED IMPORATANTE
+#+--|------------------------------------------->>>>
+#+--|
+# ─── CONFIG ───
+THOMAS_VOICE = "en-GB-ThomasNeural"
+...
+"--voice", THOMAS_VOICE,
+# Other options:
+# en-US-GuyNeural       — American male
+# en-GB-SoniaNeural     — British female
+# en-US-AriaNeural      — American female (professional)
+#+--|------------------------------------------->>>>
+#+--| chapter 6 : 4 VULTURES
+#+--|------------------------------------------->>>>
+#+--|
+PREFIX = "🎩 Nureal Thomas : "
+
+
+#+--|------------------------------------------->>>>
+#+--| chapter 4 : ZETA-LOLA ZEBRA  SUPPORT BLOCKS :
+#+--|------------------------------------------->>>>
+#+--|
+# ─── SPEAK (Edge TTS) ───
+async def speak(text, voice=THOMAS_VOICE):
+    """Nureal Thomas speaks using Edge TTS"""
+    try:
+        communicate = edge_tts.Communicate(text, voice)
+        # Save to data folder and play
+        voice_file = DATA_DIR / "thomas_voice.mp3"
+        await communicate.save(str(voice_file))
+        # Play it
+        import subprocess
+        subprocess.run(['afplay', str(voice_file)], check=False)
+
+    except edge_tts.exceptions.NoAudioReceived:
+        print("❌ NoAudioReceived — try downgrading edge-tts to 7.2.0")
+    except Exception as e:
+        print(f"❌ TTS error: {e}")
+#+--|------------------------------------------->>>>
+#+--| chapter 3 :DARWIN 7 DEF download Thomas for neural speech
+#+--|------------------------------------------->>>>
+#+--|
+def speak_sync(text, voice=THOMAS_VOICE):
+    """Sync wrapper for speak"""
+    asyncio.run(speak(text, voice))
+#+--|------------------------------------------->>>>
+# ─── JARVIS MP3 VOICE ALERT ───
+def generate_jarvis_mp3(change):
+    """Generate Thomas voice MP3 on score change. Atomic write.
+       Wording matches the MLB dashboard's jarvisSpeak() exactly.
+       Writes to thomas_voice.mp3 — the same file the dashboard watches."""
+    mp3_final = DATA_DIR / "thomas_voice.mp3"
+    mp3_tmp = DATA_DIR / "thomas_voice.tmp.mp3"
+
+    # Build the spoken line — same phrasing as dashboard
+    text = f"Sir, score change detected. {change['game']}. {change['old']} to {change['new']}."
+
+    try:
+        subprocess.run([
+            "edge-tts",
+            "--voice", THOMAS_VOICE,
+            "--text", text,
+            "--write-media", str(mp3_tmp)
+        ], check=True, timeout=15)
+
+        # Atomic swap — browser never sees a half-written file
+        os.replace(mp3_tmp, mp3_final)
+        print(f"  {GRN}🎩 Thomas voice dropped: {mp3_final.name}{R}")
+        return True
+    except FileNotFoundError:
+        print(f"  {YLW}⚠️  edge-tts not installed — run: pip install edge-tts{R}")
+        return False
+    except Exception as e:
+        print(f"  {RED}⚠️ MP3 failed: {e}{R}")
+        return False
+
+
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+#+--| JSON SAVE — Alfred & Master Art Format and MP3 WE CAN ADD HERE CHAPTER 5
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+
+def save_scores_for_alfred(games, source="YAHOO_LIVE"):
+    """
+    🎩 MichaelAngelo → Alfred → Master Art
+    Saves scores in the exact format Alfred's HTML expects
+    """
+    from datetime import datetime
+    import json
+    
+    data = {
+        "source": source.upper(),
+        "fetched_at": datetime.now().isoformat(),
+        "total": len(games),
+        "games": []
+    }
+    
+    for game in games:
+        team1 = game.get('team1', 'Unknown')
+        team2 = game.get('team2', 'Unknown')
+        score1 = game.get('score1', '0')
+        score2 = game.get('score2', '0')
+        status = game.get('status', 'Scheduled')
+        
+        # Determine winners
+        try:
+            s1 = int(score1)
+            s2 = int(score2)
+        except:
+            s1, s2 = 0, 0
+        
+        away_winner = s1 > s2
+        home_winner = s2 > s1
+        
+        data["games"].append({
+            "away": team1,
+            "home": team2,
+            "away_score": str(score1),
+            "home_score": str(score2),
+            "status": status,
+            "away_winner": away_winner,
+            "home_winner": home_winner
+        })
+    
+    # Save to Alfred's expected location
+    json_path = DATA_DIR / "scores.json"
+    with open(json_path, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+    
+    print(f"  💾  JSON saved for Alfred: {json_path}")
+    return json_path
+
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+#+--| parse bing bing bing
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+
+def parse_bing_html(html):
+    games = []
+    seen_games = set()
+    
+    # Scheduled games
+    pattern = r'aria-label="See more details about ([^,]+) vs ([^,]+), (Today|Tomorrow), ([^"]+)"'
+    matches = re.findall(pattern, html)
+    for match in matches:
+        team1, team2, day, time_info = match
+        game_key = f"{team1}|{team2}"
+        if game_key in seen_games:
+            continue
+        seen_games.add(game_key)
+        game = {"team1": team1.strip(), "team2": team2.strip(), "time": time_info.strip(), "day": day, 
+                "status": "Scheduled", "score1": None, "score2": None}
+        games.append(game)
+    
+    # Completed games
+    score_pattern = r'([A-Za-z\s]+?)\s+(\d+)\s*[-–]\s*(\d+)\s+([A-Za-z\s]+?)(?:\s*\(FINAL\)|\s*\(Final\))'
+    score_matches = re.findall(score_pattern, html, re.IGNORECASE)
+    for match in score_matches:
+        team1, team2 = match[0].strip(), match[3].strip()
+        game_key = f"{team1}|{team2}"
+        if game_key in seen_games:
+            continue
+        seen_games.add(game_key)
+        game = {"team1": team1, "score1": match[1], "score2": match[2], "team2": team2, 
+                "status": "Final", "day": "Today", "time": None}
+        games.append(game)
+    
+    # Live games
+    live_pattern = r'aria-label="See more details about ([^,]+) vs ([^,]+), ([^,]+) (\d+), ([^,]+) (\d+), ([^"]+)"'
+    live_matches = re.findall(live_pattern, html)
+    for match in live_matches:
+        team1, team2, score1, score2, status = match[0].strip(), match[1].strip(), match[3], match[5], match[6].strip()
+        game_key = f"{team1}|{team2}"
+        if game_key in seen_games:
+            continue
+        seen_games.add(game_key)
+        game = {"team1": team1, "team2": team2, "score1": score1, "score2": score2, 
+                "status": "Live", "day": "Today", "time": status}
+        games.append(game)
+    
+    return games
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+#+--| parse yahoo parse yahoo yahoo yahooo
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+
+def parse_yahoo_live(text):
+    """Parse Yahoo live scores from raw text."""
+    games = []
+    lines = text.strip().split('\n')
+    
+    for line in lines:
+        # Pattern: "BREW 9 - CHC 5"
+        match = re.search(r'([A-Z]{2,4})\s+(\d+)\s*-\s*([A-Z]{2,4})\s+(\d+)', line)
+        if match:
+            team1 = match.group(1)
+            score1 = match.group(2)
+            team2 = match.group(3)
+            score2 = match.group(4)
+            
+            # Map abbreviations to full names
+            team_names = {
+                'NYY': 'Yankees', 'LAA': 'Angels',
+                'BREW': 'Brewers', 'CHC': 'Cubs',
+                'BOS': 'Red Sox', 'SEA': 'Mariners',
+                'CWS': 'White Sox', 'HOU': 'Astros',
+                'TB': 'Rays', 'NYM': 'Mets',
+                'PIT': 'Pirates'
+            }
+            
+            games.append({
+                'team1': team_names.get(team1, team1),
+                'team2': team_names.get(team2, team2),
+                'score1': score1,
+                'score2': score2,
+                'status': 'Live'
+            })
+    
+    return games
+
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+#+--|mlb oficial parse
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+#+--|
+
+def parse_mlb_official(html):
+    games = []
+    seen_games = set()
+    
+    # Look for team names in the HTML
+    team_pattern = r'<span[^>]*class="[^"]*team-name[^"]*"[^>]*>([^<]+)</span>'
+    teams = re.findall(team_pattern, html)
+    
+    # Look for scores
+    score_pattern = r'<span[^>]*class="[^"]*score[^"]*"[^>]*>(\d+)</span>'
+    scores = re.findall(score_pattern, html)
+    
+    # Look for status
+    status_pattern = r'<span[^>]*class="[^"]*status[^"]*"[^>]*>([^<]+)</span>'
+    statuses = re.findall(status_pattern, html)
+    
+    # Pair teams and scores
+    for i in range(0, len(teams), 2):
+        if i + 1 < len(teams):
+            team1 = teams[i].strip()
+            team2 = teams[i+1].strip()
+            game_key = f"{team1}|{team2}"
+            if game_key in seen_games:
+                continue
+            seen_games.add(game_key)
+            
+            score1 = scores[i] if i < len(scores) else "0"
+            score2 = scores[i+1] if i+1 < len(scores) else "0"
+            status = statuses[i//2] if i//2 < len(statuses) else "Scheduled"
+            
+            game = {
+                "team1": team1,
+                "team2": team2,
+                "score1": score1,
+                "score2": score2,
+                "status": status,
+                "day": "Today",
+                "time": None
+            }
+            games.append(game)
+    
+    return games
+
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+#+--| mikey spin your samba lambada : nunchuck braille spinner 
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+#+--|
+def mikey_countdown(seconds=120):
+    spin = samba_lambda_spin()
+    for remaining in range(seconds, 0, -1):
+        for _ in range(12):                          # 12 frames per second
+            frame = next(spin)
+            print(f"\r   {frame}  i am checking… refreshing in {remaining:3}s sir ", end='', flush=True)
+            time.sleep(0.08)                         # matches your generator's beat
+    print("\r   [DONE]  cycle complete — checking now…                              ")
+
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+#+--| CHAPTER 3: 𝒊 ε epsilon — DEFINITIONS (helpers)
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+
+def samba_lambda_spin():
+    spin_chars = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
+    idx = 0
+    while True:
+        yield spin_chars[idx % len(spin_chars)]
+        idx += 1
+        time.sleep(0.08)
+
+def exit_handler(sig, frame):
+    print(f"\n  {ORG}🟠  Mikey dropping the nunchucks...{R}")
+    print(f"  {ORG}🟠  COWABUNGA forever. ❤️{R}\n")
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, exit_handler)
+signal.signal(signal.SIGTERM, exit_handler)
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+#+--|Darwin darwin darwin 
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+#+--|
+def darwin_format(games, source):
+    output = []
+    output.append("-" * 40)
+    output.append(f"⚾  MLB SCOREBOARD  —  {time.strftime('%A, %B %d, %Y — %I:%M %p')}  🟠🐢")
+    output.append("-" * 40)
+    
+    if games:
+        output.append(f"  📡 Source: {source.upper()}")
+        output.append("")
+        output.append("  📅 GAMES:")
+        output.append("  " + "-" * 40)
+        
+        for i, game in enumerate(games, 1):
+            team1 = game.get('team1', '?')
+            team2 = game.get('team2', '?')
+            score1 = game.get('score1', '0')
+            score2 = game.get('score2', '0')
+            status = game.get('status', 'Scheduled')
+            
+            if status == 'Final':
+                output.append(f"  {i:2}. {team1:22} {score1} — {score2} {team2:22}  [DONE] Final")
+            elif status == 'Live':
+                output.append(f"  {i:2}. {team1:22} {score1} — {score2} {team2:22}  ⚾ Live")
+            else:
+                output.append(f"  {i:2}. {team1:22} vs {team2:22}  ⏰ Scheduled")
+        
+        output.append("")
+        output.append(f"  📊 {len(games)} games total")
+    else:
+        output.append("  ⏳ No games found")
+    
+    output.append("")
+    output.append("-" * 40)
+    return "\n".join(output)
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+#+--| CHAPTER 2: 𝒊 β beta — IMPORTS + PATHS (already at top)
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+
+# ─── SCORE CHANGE TRACKER ───
+previous_scores = {}
+
+def check_score_changes(games):
+    """Check for score changes and send notifications"""
+    global previous_scores
+    
+    changes = []
+    
+    for g in games:
+        # Create a unique key for each game
+        team1 = g.get('team1', '')
+        team2 = g.get('team2', '')
+        game_key = f"{team1}|{team2}"
+        
+        # Get current scores
+        score1 = g.get('score1', '0')
+        score2 = g.get('score2', '0')
+        current_score = f"{score1}-{score2}"
+        status = g.get('status', 'Unknown')
+        
+        # Check if we've seen this game before
+        if game_key in previous_scores:
+            prev_score = previous_scores[game_key]
+            
+            # If score changed, record it
+            if prev_score != current_score:
+                changes.append({
+                    'game': f"{team1} @ {team2}",
+                    'old': prev_score,
+                    'new': current_score,
+                    'status': status
+                })
+        
+        # Update previous score
+        previous_scores[game_key] = current_score
+    
+    return changes
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+#+--|chime chime chime alert
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+
+def send_score_notification(change):
+    """Send macOS notification for score change"""
+    try:
+        script = f'''
+        display notification "{change['game']}: {change['old']} → {change['new']}" with title "⚾ SCORE CHANGE" subtitle "{change['status']}" sound name "Ping"
+        '''
+        subprocess.run(['osascript', '-e', script], capture_output=True, timeout=5)
+        print(f"  {ORG}🔔 Score change!{R}")
+        print(f"  {GRN}  {change['game']}: {change['old']} → {change['new']}{R}")
+    except Exception as e:
+        print(f"  {RED}⚠️ Notification failed: {e}{R}")
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+#+--| CHAPTER 1: 𝒊 α alpha — LAUNCH SYMBOL (main) SAVE IT HERE FIRST IN MAIN THAN GO TO CHAPTER 5
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+
+def main():
+    print("\n" + "-"*40)
+    print("🟠  MICHELANGELO  —  SCOREBOARD SCOUT")
+    print("📅", time.strftime("%A, %B %d, %Y — %I:%M %p"))
+    print("📡  METHODS: Bing → Yahoo → MLB Official")
+    print("⏱️  REFRESH: Every 2 minutes")
+    print("-"*40 + "\n")
+    
+    show_glassnotes()
+    
+    spinner = samba_lambda_spin()
+    cycle = 0
+    global previous_scores
+    
+    while True:
+        cycle += 1
+        s = next(spinner)
+        print(f"\r  {ORG}{s}{R}  {time.strftime('%I:%M:%S %p')}  |   CHECKING.....", end="", flush=True)
+        
+        games, source = scout_full_page()
+        
+        if not games:
+            time.sleep(60)
+            continue
+        
+        changes = check_score_changes(games)
+        for change in changes:
+            send_score_notification(change)
+            generate_jarvis_mp3(change)
+        
+        output = darwin_format(games, source)
+        print("\n" + output)
+        
+        # ─── SAVE TXT (Mikey's original) ───
+        txt_file = DATA_DIR / f"{source}_scoreboard.txt"
+        with open(txt_file, 'w', encoding='utf-8') as f:
+            f.write(output)
+        print(f"  💾  Saved TXT to {txt_file}")
+        
+        # ─── SAVE JSON (NEW: Alfred & Master Art) ───
+        save_scores_for_alfred(games, source)
+        
+        print(f"\r  {GRN}[DONE]  Cycle {cycle} complete. {len(games)} games found. Waiting 120s...{R}")
+        mikey_countdown(120)
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+if __name__ == "__main__":
+    main()
