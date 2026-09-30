@@ -155,6 +155,8 @@ def scout_full_page():
         req = urllib.request.Request(url, headers=headers)
         response = urllib.request.urlopen(req, timeout=15)
         html = response.read().decode('utf-8')
+        # dump raw HTML for inspection
+        (DATA_DIR / "yahoo_scorefeed.html").write_text(html, encoding='utf-8')
 
         games = []
         seen = set()
@@ -228,21 +230,37 @@ def scout_full_page():
                                 break
                         break
                     j += 1
-
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+#+--|micheal its time to write here the block is I think 16 spaces papa spinner
+#+--|----------- or 12 I don't know Papi 🦅🦅🦅🦅🦅🦅🦅🦅🦅
+#+--|#==============#🕊️ G+ Apibird + Data Scientist ✓
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+#+--|
+#==============#
                 if opp_full and opp_score:
                     key = f"{full_match}|{opp_full}"
                     if key not in seen:
                         seen.add(key)
-                        # guess status: 1-digit scores → Live, higher → check
-                        games.append({
+
+                        # ── stash raw HTML around both teams so base reader can see it ──
+                        idx1 = html.find(full_match)
+                        idx2 = html.find(opp_full, idx1 + 1 if idx1 != -1 else 0)
+                        start = max(0, min(idx1 if idx1 != -1 else 0, idx2 if idx2 != -1 else 0) - 800)
+                        end   = max(idx1, idx2) + 2500 if (idx1 != -1 or idx2 != -1) else 0
+                        card_html = html[start:end] if end > start else ''
+
+                        game = {
                             'team1': full_match,
                             'team2': opp_full,
                             'score1': third,
                             'score2': opp_score,
                             'status': 'Live',
-                        })
+                            '_card_html': card_html,
+                        }
+                        games.append(fill_bases_for_game(game))
                 i += 3
                 continue
+#==============#
 
             # ── Case B: Scheduled game (third line is a record like "96-58")
             if re.match(r'^\d+-\d+$', third):
@@ -263,18 +281,26 @@ def scout_full_page():
                     key = f"{full_match}|{opp_full}"
                     if key not in seen:
                         seen.add(key)
-                        games.append({
+
+                        idx1 = html.find(full_match)
+                        idx2 = html.find(opp_full, idx1 + 1 if idx1 != -1 else 0)
+                        start = max(0, min(idx1 if idx1 != -1 else 0, idx2 if idx2 != -1 else 0) - 800)
+                        end   = max(idx1, idx2) + 2500 if (idx1 != -1 or idx2 != -1) else 0
+                        card_html = html[start:end] if end > start else ''
+
+                        game = {
                             'team1': full_match,
                             'team2': opp_full,
                             'score1': '0',
                             'score2': '0',
                             'status': 'Scheduled',
-                        })
+                            '_card_html': card_html,
+                        }
+                        games.append(fill_bases_for_game(game))
                 i += 3
                 continue
 
             i += 1
-
         if games:
             live = sum(1 for g in games if g['status'] == 'Live')
             sched = sum(1 for g in games if g['status'] == 'Scheduled')
@@ -415,7 +441,7 @@ def save_scores_for_alfred(games, source="YAHOO_LIVE"):
         })
     
     # Save to Alfred's expected location
-    json_path = DATA_DIR / "scores.json"
+    json_path = DATA_DIR / "mlbscores.json"
     with open(json_path, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
     
@@ -597,32 +623,49 @@ def darwin_format(games, source):
     output.append("-" * 40)
     output.append(f"⚾  MLB SCOREBOARD  —  {time.strftime('%A, %B %d, %Y — %I:%M %p')}  🟠🐢")
     output.append("-" * 40)
-    
+
     if games:
         output.append(f"  📡 Source: {source.upper()}")
         output.append("")
         output.append("  📅 GAMES:")
         output.append("  " + "-" * 40)
-        
+
         for i, game in enumerate(games, 1):
             team1 = game.get('team1', '?')
             team2 = game.get('team2', '?')
             score1 = game.get('score1', '0')
             score2 = game.get('score2', '0')
             status = game.get('status', 'Scheduled')
-            
+            inning = game.get('inning', '')
+
+            # ── game header line ──
             if status == 'Final':
                 output.append(f"  {i:2}. {team1:22} {score1} — {score2} {team2:22}  [DONE] Final")
             elif status == 'Live':
-                output.append(f"  {i:2}. {team1:22} {score1} — {score2} {team2:22}  ⚾ Live")
+                line = f"  {i:2}. {team1:22} {score1} — {score2} {team2:22}  ⚾ Live"
+                if inning:
+                    line += f"  ·  {inning}"
+                output.append(line)
             else:
                 output.append(f"  {i:2}. {team1:22} vs {team2:22}  ⏰ Scheduled")
-        
-        output.append("")
+
+            # ── TIMELINE BLOCK — one line per game underneath ──
+            output.append("      ┌─ TIMELINE ────────────────────────────────────")
+            output.append(f"      │  inning   : {inning or '—'}")
+            output.append(f"      │  outs     : {game.get('count', {}).get('outs', '—')}")
+            output.append(f"      │  balls    : {game.get('count', {}).get('balls', '—')}")
+            output.append(f"      │  strikes  : {game.get('count', {}).get('strikes', '—')}")
+            output.append(f"      │  bases    :")
+            diamond = draw_bases(game.get('bases', {}))
+            for dline in diamond.split("\n"):
+                output.append(f"      │    {dline}")
+            output.append("      └───────────────────────────────────────────────")
+            output.append("")
+
         output.append(f"  📊 {len(games)} games total")
     else:
         output.append("  ⏳ No games found")
-    
+
     output.append("")
     output.append("-" * 40)
     return "\n".join(output)
@@ -668,6 +711,94 @@ def check_score_changes(games):
         previous_scores[game_key] = current_score
     
     return changes
+
+
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+#+--| BASES — read 1st/2nd/3rd occupancy from a Yahoo game card
+#+--| prints ASCII diamond + stashes game['bases'] and game['inning']
+#+--| micheal read some fucking bases and tell who's on base would yah spinner?
+#+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
+
+def draw_bases(bases):
+    """ASCII diamond. Occupied = ●  Empty = ○
+            2nd
+         3rd   1st
+            home
+    """
+    b2 = '●' if bases.get('second') else '○'
+    b3 = '●' if bases.get('third')  else '○'
+    b1 = '●' if bases.get('first')  else '○'
+    return (
+        f"      {b2}      \n"
+        f"   {b3}   {b1}   \n"
+        f"      ⌂      "
+    )
+
+
+def read_bases(game_card_html):
+    """
+    Returns (bases_dict, inning_str)
+    bases_dict = {'first': bool, 'second': bool, 'third': bool, 'home': False}
+
+    Two shapes Yahoo uses — either works with this:
+
+    Shape A (class-based):
+      <div class="bases">
+        <span class="base first occupied"></span>
+        <span class="base second"></span>
+        <span class="base third occupied"></span>
+      </div>
+
+    Shape B (svg fill-based):
+      <svg class="base-diamond">
+        <polygon points="..." fill="#fff" />     ← occupied
+        <polygon points="..." fill="#2b323d" />  ← empty
+        <polygon points="..." fill="#fff" />
+      </svg>
+    """
+    bases = {'first': False, 'second': False, 'third': False, 'home': False}
+    inning = ''
+
+    # ── inning text: "Top 3rd", "Bot 7th", "Mid 5th", "End 8th"
+    m = re.search(
+        r'(Top|Bot|Bottom|Mid|End)\s+(\d+)(?:st|nd|rd|th)?',
+        game_card_html, re.IGNORECASE
+    )
+    if m:
+        half = m.group(1).capitalize()
+        if half == 'Bottom': half = 'Bot'
+        inning = f"{half} {m.group(2)}"
+
+    # ── Shape A: class="base first occupied"
+    for slot in ('first', 'second', 'third'):
+        if re.search(
+            rf'class="[^"]*base[^"]*{slot}[^"]*occupied[^"]*"',
+            game_card_html, re.IGNORECASE
+        ):
+            bases[slot] = True
+
+    # ── Shape B: svg polygon fills — occupied = white / #fff / #ffffff
+    if not any(bases.values()):
+        polys = re.findall(
+            r'<polygon[^>]*fill="(#[0-9a-fA-F]{3,6}|white)"',
+            game_card_html
+        )
+        if len(polys) >= 3:
+            for i, slot in enumerate(('first', 'second', 'third')):
+                fill = polys[i].lower()
+                if fill in ('#fff', '#ffffff', 'white'):
+                    bases[slot] = True
+
+    return bases, inning
+
+
+def fill_bases_for_game(game):
+    card_html = game.get('_card_html', '')
+    bases, inning = read_bases(card_html)
+    game['bases']  = bases
+    game['inning'] = inning
+    game['count']  = {'balls': 0, 'strikes': 0, 'outs': 0}
+    return game
 #+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
 #+--|chime chime chime alert
 #+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
@@ -689,10 +820,15 @@ def send_score_notification(change):
 
 def main():
     print("\n" + "-"*40)
+
     print("🟠  MICHELANGELO  —  SCOREBOARD SCOUT")
+
     print("📅", time.strftime("%A, %B %d, %Y — %I:%M %p"))
+
     print("📡  METHODS: Bing → Yahoo → MLB Official")
-    print("⏱️  REFRESH: Every 2 minutes")
+
+    print("⏱️  REFRESH: Every 60 seconds")
+
     print("-"*40 + "\n")
     
     show_glassnotes()
@@ -728,9 +864,20 @@ def main():
         
         # ─── SAVE JSON (NEW: Alfred & Master Art) ───
         save_scores_for_alfred(games, source)
+
+        # ─── SAVE HTML (raw rendered page for inspection) ───
+        html_file = DATA_DIR / f"{source}_scoreboard.html"
+        try:
+            # copy the raw fetched html to the named file
+            raw = (DATA_DIR / "yahoo_scorefeed.html").read_text(encoding='utf-8')
+            html_file.write_text(raw, encoding='utf-8')
+            print(f"  💾  Saved HTML to {html_file}")
+        except Exception as e:
+            print(f"  ⚠️ Could not save HTML: {e}")
+
         
-        print(f"\r  {GRN}[DONE]  Cycle {cycle} complete. {len(games)} games found. Waiting 120s...{R}")
-        mikey_countdown(120)
+        print(f"\r  {GRN}[DONE]  Cycle {cycle} complete. {len(games)} games found. Waiting 60...{R}")
+        mikey_countdown(60)
 #+--|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>>>>
 if __name__ == "__main__":
     main()
